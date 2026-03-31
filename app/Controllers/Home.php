@@ -9,13 +9,8 @@ class Home extends BaseController
         return view('welcome_message');
     }
 
-    public function belajar_segment(){
-
-    }
-}
-
-
-public function belajar_segment(){
+    public function belajar_segment()
+    {
     $uri = service('uri');
     $parameter1 = $uri ->getSegment(3);
     $parameter2 = $uri ->getSegment(4);
@@ -27,4 +22,5 @@ public function belajar_segment(){
 
 
     return view('segment_view', $data);
+    }
 }
