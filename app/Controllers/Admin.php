@@ -9,5 +9,12 @@ class Admin extends BaseController
         return view('Backend/Login/login');
     }
 
+    public function dashboard(){
+        echo view('Backend/Template/header');
+        echo view('Backend/Template/sidebar');
+        echo view('Backend/Login/dashboardAdmin');
+        echo view('Backend/Template/footer');
+    }
+
 
 }

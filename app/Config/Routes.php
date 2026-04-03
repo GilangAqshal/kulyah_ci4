@@ -12,3 +12,6 @@ $routes->get('/', 'Admin::login');
 // Rourtes login admin
 ;
 $routes -> get('/admin/login-admin','Admin::login');
+
+
+$routes -> get('/admin/dashboardAdmin','Admin::dashboard');

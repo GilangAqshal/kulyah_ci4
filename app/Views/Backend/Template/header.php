@@ -7,7 +7,7 @@
 
 <link href="/Assets/css/bootstrap.min.css" rel="stylesheet">
 <link href="/Assets/css/datepicker3.css" rel="stylesheet">
-<link href="/Assetscss/bootstrap-table.css" rel="stylesheet">
+<link href="/Assets/css/bootstrap-table.css" rel="stylesheet">
 <link href="Assets/css/styles.css" rel="stylesheet">
 
 <!--[if lt IE 9]>
