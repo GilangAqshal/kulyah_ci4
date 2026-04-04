@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Controllers;
+// load models
+use App\Models\M_Admin;
 
 class Admin extends BaseController
 {
