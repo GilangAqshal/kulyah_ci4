@@ -6,12 +6,7 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Admin::login');
-// $routes->get('/home/coba-parameter/(:alpha)/(:num)/(:alphanum)/','Home::belajar_segment/$1/$2/$3');
-// $routes->method('link_samaran', 'Controller::Function');
-
-// Rourtes login admin
-;
-$routes -> get('/admin/login-admin','Admin::login');
-
-
-$routes -> get('/admin/dashboardAdmin','Admin::dashboard');
+$routes->get('/admin/login-admin', 'Admin::login');
+$routes->post('/admin/autentikasi_login', 'Admin::autentikasi');
+$routes->get('/admin/dashboardAdmin', 'Admin::dashboard');
+$routes->get('/admin/logout', 'Admin::logout');
