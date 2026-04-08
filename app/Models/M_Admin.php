@@ -45,3 +45,4 @@ class M_Admin extends Model
         return $builder->get();
     }
 }
+

@@ -11,5 +11,17 @@ Swal.fire('Success!', '<?= session()->getFlashdata('success') ?>', 'success');
 </script>
 <?php endif; ?>
 
+<script>
+    !function ($) {
+        $(document).on("click", "ul.nav li.parent > a", function () {
+            $(this).find('.icon em').toggleClass("glyphicon-minus glyphicon-plus");
+        });
+    }(window.jQuery);
+
+    $(window).on('resize', function () {
+        if ($(window).width() > 768) $('#sidebar-collapse').collapse('show');
+        if ($(window).width() <= 767) $('#sidebar-collapse').collapse('hide');
+    });
+</script>
 </body>
 </html>

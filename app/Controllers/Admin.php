@@ -67,16 +67,24 @@ class Admin extends BaseController
         echo view('Backend/Template/footer');
     }
 
-public function logout()
-{
-    session()->remove('ses_id');
-    session()->remove('ses_user');
-    session()->remove('ses_level');
-    session()->setFlashdata('info', 'Anda telah keluar dari sistem!');
-    ?>
-    <script>
-        document.location = "<?= base_url('admin/login-admin'); ?>";
-    </script>
-    <?php
-}
+    public function logout()
+    {
+        session()->remove('ses_id');
+        session()->remove('ses_user');
+        session()->remove('ses_level');
+        session()->setFlashdata('info', 'Anda telah keluar dari sistem!');
+        ?>
+        <script>
+            document.location = "<?= base_url('admin/login-admin'); ?>";
+        </script>
+        <?php
+    }
+
+        public function input_data_admin()
+    {
+        echo view('Backend/Template/header');
+        echo view('Backend/Template/sidebar');
+        echo view('Backend/MasterAdmin/input-admin');
+        echo view('Backend/Template/footer');
+    }
 }
