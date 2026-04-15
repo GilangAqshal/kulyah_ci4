@@ -12,13 +12,15 @@ class M_Admin extends Model
     {
         if ($where === false) {
             $builder = $this->db->table($this->table);
-            $builder->orderBy('nama_admin', 'ASC');
+            // $builder->orderBy('nama_admin', 'ASC');
+            $builder->orderBy('id_admin', 'ASC');
             return $builder->get(); 
         } else {
             $builder = $this->db->table($this->table);
             $builder->select('*');
             $builder->where($where);
-            $builder->orderBy('nama_admin', 'ASC');
+            // $builder->orderBy('nama_admin', 'ASC');
+            $builder->orderBy('id_admin', 'ASC');
             return $builder->get();
         }
     }

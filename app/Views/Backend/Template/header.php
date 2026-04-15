@@ -10,6 +10,8 @@
 <link href="/Assets/css/bootstrap-table.css" rel="stylesheet">
 <link href="/Assets/css/styles.css" rel="stylesheet">
 <link href="/Assets/css/sweetalert2.min.css" rel="stylesheet">
+<!-- Menggunakan CDN Font-Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Cukup satu blok script goodchars -->
 <script type="text/javascript">

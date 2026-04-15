@@ -13,27 +13,27 @@
             <ul class="children collapse" id="sub-item-master">
                 <li>
                     <a href="<?= base_url('admin/master-data-admin');?>">
-                        <span class="glyphicon glyphicon-share-alt"></span> Data Admin
+                        <span class="fa fa-database"></span> Data Admin
                     </a>
                 </li>
                 <li>
                     <a href="<?= base_url('admin/master-data-anggota');?>">
-                        <span class="glyphicon glyphicon-share-alt"></span> Data Anggota
+                        <span class="fa fa-database"></span> Data Anggota
                     </a>
                 </li>
                 <li>
                     <a href="<?= base_url('admin/master-data-kategori');?>">
-                        <span class="glyphicon glyphicon-share-alt"></span> Data Kategori
+                        <span class="fa fa-database"></span> Data Kategori
                     </a>
                 </li>
                 <li>
                     <a href="<?= base_url('admin/master-data-rak');?>">
-                        <span class="glyphicon glyphicon-share-alt"></span> Data Rak
+                        <span class="fa fa-database"></span> Data Rak
                     </a>
                 </li>
                 <li>
                     <a href="<?= base_url('admin/master-data-buku');?>">
-                        <span class="glyphicon glyphicon-share-alt"></span> Data Buku
+                        <span class="fa fa-database"></span> Data Buku
                     </a>
                 </li>
             </ul>

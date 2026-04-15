@@ -17,5 +17,8 @@ $routes->post('/admin/simpan-admin', 'Admin::simpan_data_admin');
 $routes->get('/admin/master-data-admin', 'Admin::master_data_admin');
 $routes->get('/admin/input-data-admin', 'Admin::input_data_admin');
 $routes->get('/admin/edit-data-admin/(:alphanum)', 'Admin::edit_data_admin/$1');
-$routes->get('/admin/update-admin', 'Admin::update_data_admin');
+$routes->post('/admin/update-admin', 'Admin::update_data_admin');
 $routes->get('/admin/hapus-data-admin/(:alphanum)', 'Admin::hapus_data_admin/$1');
+
+// routes untuk table anggota
+$routes->get('/admin/master-data-anggota', 'Admin::master_data_anggota');
