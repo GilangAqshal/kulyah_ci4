@@ -26,12 +26,14 @@ class M_Kategori extends Model
         return $builder->update($data);
     }
 
+    // ← Ambil SEMUA record (termasuk soft deleted) agar ID tidak pernah bentrok
     public function autoNumber()
     {
         $builder = $this->db->table($this->table);
         $builder->select('id_kategori');
         $builder->orderBy('id_kategori', 'DESC');
         $builder->limit(1);
+        // Tidak ada filter is_delete_kategori di sini — sengaja
         return $builder->get();
     }
 }

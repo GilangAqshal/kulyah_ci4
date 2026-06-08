@@ -89,62 +89,53 @@ class Admin extends BaseController
     }
 
     // Fungsi untuk menyimpan data admin baru (CREATE)
-    public function simpan_data_admin()
-    {
-        if (session()->get('ses_id') == "" || 
-            session()->get('ses_user') == "" || 
-            session()->get('ses_level') == "") {
-            session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
-            ?>
-            <script>document.location = "<?= base_url('admin/login-admin'); ?>";</script>
-            <?php
-            return;
-        } else {
-            $modelAdmin = new M_Admin();
-
-            $nama     = $this->request->getPost('nama');
-            $username = $this->request->getPost('username');
-            $level    = $this->request->getPost('level');
-
-            // Cek apakah username sudah digunakan
-            $cekUname = $modelAdmin->getDataAdmin(['username_admin' => $username])->getNumRows();
-            if ($cekUname > 0) {
-                session()->setFlashdata('error', 'Username sudah digunakan!!');
-                ?>
-                <script>history.go(-1);</script>
-                <?php
-                return;
-            }
-
-            
-            $hasil = $modelAdmin->autoNumber()->getRowArray();
-            if (!$hasil) {
-                $id = "ADM001";
-            } else {
-                $kode   = $hasil['id_admin'];
-                $noUrut = (int) substr($kode, -3);
-                $noUrut++;
-                $id = "ADM" . sprintf("%03s", $noUrut);
-            }
-
-            $dataSimpan = [
-                'id_admin'       => $id,
-                'nama_admin'     => $nama,
-                'username_admin' => $username,
-                'password_admin' => password_hash('pass_admin', PASSWORD_DEFAULT),
-                'akses_level'    => $level,
-                'is_delete_admin'=> '0',
-                'created_at'     => date('Y-m-d H:i:s'),
-                'updated_at'     => date('Y-m-d H:i:s')
-            ];
-
-            $modelAdmin->saveDataAdmin($dataSimpan);
-            session()->setFlashdata('success', 'Data Admin Berhasil Ditambahkan!!');
-            ?>
-            <script>document.location = "<?= base_url('admin/master-data-admin'); ?>";</script>
-            <?php
-        }
+public function simpan_data_admin()
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
     }
+
+    $modelAdmin = new M_Admin();
+    $nama       = $this->request->getPost('nama');
+    $username   = $this->request->getPost('username');
+    $level      = $this->request->getPost('level');
+    $password   = $this->request->getPost('password');
+
+    // Validasi field kosong
+    if (empty($nama) || empty($username) || empty($level) || empty($password)) {
+        session()->setFlashdata('error', 'Semua field wajib diisi!');
+        return redirect()->to(base_url('admin/input-data-admin'));
+    }
+
+    // Cek username duplikat
+    $cek = $modelAdmin->getDataAdmin([
+        'username_admin'  => $username,
+        'is_delete_admin' => '0'
+    ])->getNumRows();
+    if ($cek > 0) {
+        session()->setFlashdata('error', 'Username sudah digunakan!');
+        return redirect()->to(base_url('admin/input-data-admin'));
+    }
+
+    // Generate ID
+    $hasil = $modelAdmin->autoNumber()->getRowArray();
+    $id    = !$hasil ? 'ADM001' : 'ADM' . sprintf('%03d', (int)substr($hasil['id_admin'], -3) + 1);
+
+    $modelAdmin->saveDataAdmin([
+        'id_admin'        => $id,
+        'nama_admin'      => $nama,
+        'username_admin'  => $username,
+        'password_admin'  => password_hash($password, PASSWORD_DEFAULT), // ← hash password dari input
+        'akses_level'     => $level,
+        'is_delete_admin' => '0',
+        'created_at'      => date('Y-m-d H:i:s'),
+        'updated_at'      => date('Y-m-d H:i:s'),
+    ]);
+
+    session()->setFlashdata('success', 'Data Admin Berhasil Ditambahkan!');
+    return redirect()->to(base_url('admin/master-data-admin'));
+}
         // Fungsi untuk menampilkan daftar admin (READ)
     public function master_data_admin()
     {
@@ -209,32 +200,34 @@ class Admin extends BaseController
     }
 
     // Fungsi untuk menyimpan perubahan data admin (UPDATE - bagian 2)
-    public function update_data_admin()
-    {
-        $modelAdmin = new M_Admin();
-
-        // Ambil ID dari input hidden yang kita buat tadi
-        $idUpdate = $this->request->getPost('id_admin'); 
-        $nama     = $this->request->getPost('nama');
-        $level    = $this->request->getPost('level');
-
-        if ($nama == "" || $level == "" || $idUpdate == "") {
-            // ... logika error ...
-        } else {
-            $dataUpdate = [
-                'nama_admin'  => $nama,
-                'akses_level' => $level,
-                'updated_at'  => date('Y-m-d H:i:s')
-            ];
-            $whereUpdate = ['id_admin' => $idUpdate];
-
-            $modelAdmin->updateDataAdmin($dataUpdate, $whereUpdate);
-            
-            // Tidak perlu session()->remove('idUpdate') lagi
-            session()->setFlashdata('success', 'Data Admin Berhasil Diperbaharui!');
-            return redirect()->to(base_url('admin/master-data-admin'));
-        }
+public function update_data_admin()
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
     }
+
+    $modelAdmin  = new M_Admin();
+    $idUpdate    = $this->request->getPost('id_admin');
+    $nama        = $this->request->getPost('nama');
+    $level       = $this->request->getPost('level');
+    $passwordBaru = $this->request->getPost('password');
+
+    $dataUpdate = [
+        'nama_admin'  => $nama,
+        'akses_level' => $level,
+        'updated_at'  => date('Y-m-d H:i:s'),
+    ];
+
+    // Hanya update password jika diisi
+    if (!empty($passwordBaru)) {
+        $dataUpdate['password_admin'] = password_hash($passwordBaru, PASSWORD_DEFAULT);
+    }
+
+    $modelAdmin->updateDataAdmin($dataUpdate, ['id_admin' => $idUpdate]);
+    session()->setFlashdata('success', 'Data Admin Berhasil Diperbarui!');
+    return redirect()->to(base_url('admin/master-data-admin'));
+}
 
     // Fungsi untuk menghapus data admin (DELETE - soft delete)
     public function hapus_data_admin($idHapus = null)

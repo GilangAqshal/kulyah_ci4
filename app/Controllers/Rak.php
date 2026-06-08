@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers;
 
-use App\Models\M_Rak; // ← WAJIB
+use App\Models\M_Rak;
 
 class Rak extends BaseController
 {
@@ -46,7 +46,7 @@ class Rak extends BaseController
             'nama_rak'      => $this->request->getPost('nama_rak'),
             'is_delete_rak' => '0',
             'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s'),
+            'update_at'     => date('Y-m-d H:i:s'), // ← PERBAIKAN: Ganti ke update_at
         ]);
         session()->setFlashdata('success', 'Data Rak Berhasil Ditambahkan!');
         return redirect()->to(base_url('admin/master-data-rak'));
@@ -68,7 +68,7 @@ class Rak extends BaseController
         if ($redir = $this->cekSesi()) return $redir;
         $model = new M_Rak();
         $model->updateDataRak(
-            ['nama_rak'  => $this->request->getPost('nama_rak'), 'updated_at' => date('Y-m-d H:i:s')],
+            ['nama_rak'  => $this->request->getPost('nama_rak'), 'update_at' => date('Y-m-d H:i:s')], // ← PERBAIKAN: update_at
             ['id_rak'    => $this->request->getPost('id_rak')]
         );
         session()->setFlashdata('success', 'Data Rak Berhasil Diperbarui!');
@@ -80,7 +80,7 @@ class Rak extends BaseController
         if ($redir = $this->cekSesi()) return $redir;
         $model = new M_Rak();
         $model->updateDataRak(
-            ['is_delete_rak' => '1', 'updated_at' => date('Y-m-d H:i:s')],
+            ['is_delete_rak' => '1', 'update_at' => date('Y-m-d H:i:s')], // ← PERBAIKAN: update_at
             ['sha1(id_rak)'  => $idHapus]
         );
         session()->setFlashdata('success', 'Data Rak Berhasil Dihapus!');
