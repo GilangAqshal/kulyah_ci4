@@ -17,27 +17,44 @@
                             </button>
                         </a>
                     </h3>
-                    <hr />
-                   <table class="table table-bordered table-striped table-hover" 
-                        data-toggle="table"
-                        data-show-refresh="true"
-                        data-show-toggle="true"
-                        data-show-columns="true"
-                        data-search="true"
-                        data-select-item-name="toolbar1"
-                        data-pagination="true"
-                        data-sort-name="name"
-                        data-sort-order="asc">
+                    <hr/>
+                    <table class="table table-bordered table-striped table-hover"
+                           data-toggle="table" data-search="true"
+                           data-pagination="true" data-sort-order="asc">
                         <thead>
                             <tr>
-                                <th data-sortable="true" class="text-center">No</th>
-                                <th data-sortable="true" class="text-center">Nama Anggota</th>
-                                <th data-sortable="true" class="text-center">Jenis Kelamin</th>
-                                <th data-sortable="true" class="text-center">No Telp</th>
-                                <th data-sortable="true" class="text-center">Alamat</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center">Nama Anggota</th>
+                                <th class="text-center">Jenis Kelamin</th>
+                                <th class="text-center">No. Telp</th>
+                                <th class="text-center">Alamat</th>
+                                <th class="text-center">Opsi</th>
                             </tr>
                         </thead>
-
+                        <tbody>
+                        <?php $no = 1; foreach ($data_anggota as $row): ?>
+                            <tr>
+                                <td class="text-center"><?= $no++ ?></td>
+                                <td><?= esc($row['nama_anggota']) ?></td>
+                                <td class="text-center">
+                                    <?= $row['jenis_kelamin'] == 'L' ? 'Laki-laki' : 'Perempuan' ?>
+                                </td>
+                                <td class="text-center"><?= esc($row['noTelp']) ?></td>
+                                <td><?= esc($row['alamat']) ?></td>
+                                <td class="text-center">
+                                    <a href="<?= base_url('admin/edit-data-anggota/' . sha1($row['id_anggota'])) ?>">
+                                        <button class="btn btn-xs btn-success">
+                                            <i class="fa fa-pencil"></i> Edit
+                                        </button>
+                                    </a>
+                                    <button class="btn btn-xs btn-danger"
+                                            onclick="doDelete('<?= sha1($row['id_anggota']) ?>')">
+                                        <i class="fa fa-trash"></i> Hapus
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -45,21 +62,21 @@
     </div>
 </div>
 
-<script type="text/javascript">
-function doDelete(idDelete) {
-    swal({
-        title: "Hapus Data Admin?",
-        text: "Data ini akan terhapus secara permanen!!",
-        icon: "warning",
-        buttons: true,
-        dangerMode: false,
-    })
-    .then((ok) => {
-        if (ok) {
-            window.location.href = '<?= base_url(); ?>/admin/hapus-data-anggota/' + idDelete;
-        } else {
-            $(this).removeAttr('disabled');
+<script>
+function doDelete(id) {
+    Swal.fire({
+        title: 'Hapus Data Anggota?',
+        text: 'Data akan dinonaktifkan dari sistem!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '<?= base_url() ?>/admin/hapus-data-anggota/' + id;
         }
-    })
+    });
 }
 </script>

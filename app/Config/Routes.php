@@ -5,20 +5,50 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/home/belajar_segment/(:alpha)/(:num)/(:alphanum)', 'Home::belajar_segment/$1/$2/$3');
+
+// === LOGIN & DASHBOARD ===
 $routes->get('/', 'Admin::login');
 $routes->get('/admin/login-admin', 'Admin::login');
 $routes->post('/admin/autentikasi_login', 'Admin::autentikasi');
 $routes->get('/admin/dashboardAdmin', 'Admin::dashboard');
 $routes->get('/admin/logout', 'Admin::logout');
 
-// Routes untuk admin module
-$routes->post('/admin/simpan-admin', 'Admin::simpan_data_admin');
+// === ADMIN MODULE ===
 $routes->get('/admin/master-data-admin', 'Admin::master_data_admin');
 $routes->get('/admin/input-data-admin', 'Admin::input_data_admin');
+$routes->post('/admin/simpan-admin', 'Admin::simpan_data_admin');
 $routes->get('/admin/edit-data-admin/(:alphanum)', 'Admin::edit_data_admin/$1');
 $routes->post('/admin/update-admin', 'Admin::update_data_admin');
 $routes->get('/admin/hapus-data-admin/(:alphanum)', 'Admin::hapus_data_admin/$1');
 
-// routes untuk table anggota
-$routes->get('/admin/master-data-anggota', 'Admin::master_data_anggota');
+// === ANGGOTA ===
+$routes->get('/admin/master-data-anggota', 'Anggota::master_data_anggota');
+$routes->get('/admin/input-data-anggota', 'Anggota::input_data_anggota');
+$routes->post('/admin/simpan-anggota', 'Anggota::simpan_data_anggota');
+$routes->get('/admin/edit-data-anggota/(:alphanum)', 'Anggota::edit_data_anggota/$1');
+$routes->post('/admin/update-anggota', 'Anggota::update_data_anggota');
+$routes->get('/admin/hapus-data-anggota/(:alphanum)', 'Anggota::hapus_data_anggota/$1');
+
+// === KATEGORI ===
+$routes->get('/admin/master-data-kategori', 'Kategori::master_data_kategori');
+$routes->get('/admin/input-data-kategori', 'Kategori::input_data_kategori');
+$routes->post('/admin/simpan-kategori', 'Kategori::simpan_data_kategori');
+$routes->get('/admin/edit-data-kategori/(:alphanum)', 'Kategori::edit_data_kategori/$1');
+$routes->post('/admin/update-kategori', 'Kategori::update_data_kategori');
+$routes->get('/admin/hapus-data-kategori/(:alphanum)', 'Kategori::hapus_data_kategori/$1');
+
+// === RAK ===
+$routes->get('/admin/master-data-rak', 'Rak::master_data_rak');
+$routes->get('/admin/input-data-rak', 'Rak::input_data_rak');
+$routes->post('/admin/simpan-rak', 'Rak::simpan_data_rak');
+$routes->get('/admin/edit-data-rak/(:alphanum)', 'Rak::edit_data_rak/$1');
+$routes->post('/admin/update-rak', 'Rak::update_data_rak');
+$routes->get('/admin/hapus-data-rak/(:alphanum)', 'Rak::hapus_data_rak/$1');
+
+// === BUKU ===
+$routes->get('/admin/master-data-buku', 'Buku::master_data_buku');
+$routes->get('/admin/input-data-buku', 'Buku::input_data_buku');
+$routes->post('/admin/simpan-buku', 'Buku::simpan_data_buku');
+$routes->get('/admin/edit-data-buku/(:alphanum)', 'Buku::edit_data_buku/$1');
+$routes->post('/admin/update-buku', 'Buku::update_data_buku');
+$routes->get('/admin/hapus-data-buku/(:alphanum)', 'Buku::hapus_data_buku/$1');

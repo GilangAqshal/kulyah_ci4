@@ -2,24 +2,24 @@
 namespace App\Models;
 use CodeIgniter\Model;
 
-class M_Admin extends Model
+class M_Kategori extends Model
 {
-    protected $table = 'tbl_admin';
+    protected $table = 'tbl_kategori';
 
-    public function getDataAdmin($where = false)
+    public function getDataKategori($where = false)
     {
         $builder = $this->db->table($this->table);
-        $builder->orderBy('id_admin', 'ASC');
+        $builder->orderBy('id_kategori', 'ASC');
         if ($where) $builder->where($where);
         return $builder->get();
     }
 
-    public function saveDataAdmin($data)
+    public function saveDataKategori($data)
     {
         return $this->db->table($this->table)->insert($data);
     }
 
-    public function updateDataAdmin($data, $where)
+    public function updateDataKategori($data, $where)
     {
         $builder = $this->db->table($this->table);
         $builder->where($where);
@@ -29,8 +29,8 @@ class M_Admin extends Model
     public function autoNumber()
     {
         $builder = $this->db->table($this->table);
-        $builder->select('id_admin');
-        $builder->orderBy('id_admin', 'DESC');
+        $builder->select('id_kategori');
+        $builder->orderBy('id_kategori', 'DESC');
         $builder->limit(1);
         return $builder->get();
     }

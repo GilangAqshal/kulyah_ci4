@@ -10,7 +10,7 @@
 Swal.fire('Success!', '<?= session()->getFlashdata('success') ?>', 'success');
 </script>
 <?php endif; ?>
-
+  
 <script>
     !function ($) {
         $(document).on("click", "ul.nav li.parent > a", function () {
