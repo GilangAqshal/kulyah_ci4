@@ -5,7 +5,6 @@
             <li class="active">Master Data Buku</li>
         </ol>
     </div>
-    
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-default">
@@ -18,19 +17,18 @@
                         </a>
                     </h3>
                     <hr/>
-                    
                     <table class="table table-bordered table-striped table-hover"
                            data-toggle="table" data-search="true" data-pagination="true">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 5%">No</th>
-                                <th class="text-center" style="width: 10%">Cover</th>
-                                <th class="text-center" style="width: 25%">Judul Buku</th>
-                                <th class="text-center" style="width: 15%">Pengarang</th>
-                                <th class="text-center" style="width: 12%">Kategori</th>
-                                <th class="text-center" style="width: 12%">Rak</th>
-                                <th class="text-center" style="width: 6%">Stok</th>
-                                <th class="text-center" style="width: 15%">Opsi</th>
+                                <th class="text-center" style="width:5%">No</th>
+                                <th class="text-center" style="width:8%">Cover</th>
+                                <th class="text-center">Judul Buku</th>
+                                <th class="text-center">Pengarang</th>
+                                <th class="text-center" style="width:12%">Kategori</th>
+                                <th class="text-center" style="width:10%">Rak</th>
+                                <th class="text-center" style="width:6%">Stok</th>
+                                <th class="text-center" style="width:20%">Opsi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,27 +36,43 @@
                             <tr>
                                 <td class="text-center"><?= $no++ ?></td>
                                 <td class="text-center">
-                                    <img src="<?= base_url('Assets/cover/' . $row['cover_buku']) ?>"
-                                         width="50" height="65"
-                                         style="object-fit:cover; border-radius:4px; box-shadow: 0 1px 4px rgba(0,0,0,0.2);"
-                                         onerror="this.src='<?= base_url('Assets/img/no-image.jpg') ?>'">
+                                    <?php
+                                    // Gunakan /Assets/... bukan base_url('Assets/...')
+                                    $coverFile = FCPATH . 'Assets/uploads/cover/' . $row['cover_buku'];
+                                    $coverSrc  = (file_exists($coverFile) && $row['cover_buku'] != 'no-image.jpg' && $row['cover_buku'] != '')
+                                        ? '/Assets/uploads/cover/' . $row['cover_buku']
+                                        : '/Assets/img/no-image.jpg';
+                                    ?>
+                                    <img src="<?= $coverSrc ?>"
+                                         width="45" height="60"
+                                         style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
                                 </td>
-                                <td><strong><?= esc($row['judul_buku']) ?></strong></td>
+                                <td><?= esc($row['judul_buku']) ?><br>
+                                    <small class="text-muted"><?= esc($row['penerbit']) ?> (<?= esc($row['tahun']) ?>)</small>
+                                </td>
                                 <td><?= esc($row['pengarang']) ?></td>
-                                <td class="text-center"><span class="label label-default"><?= esc($row['nama_kategori'] ?? 'Tidak Ada') ?></span></td>
-                                <td class="text-center"><span class="label label-info"><?= esc($row['nama_rak'] ?? 'Tidak Ada') ?></span></td>
-                                <td class="text-center"><?= $row['jumlah_eksemplar'] ?></td>
                                 <td class="text-center">
-                                    <a href="<?= base_url('admin/edit-data-buku/' . sha1($row['id_buku'])) ?>" class="btn btn-xs btn-success" title="Edit Data">
+                                    <span class="label label-info"><?= esc($row['nama_kategori']) ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="label label-default"><?= esc($row['nama_rak']) ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge"><?= $row['jumlah_eksemplar'] ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="<?= base_url('admin/edit-data-buku/'.sha1($row['id_buku'])) ?>"
+                                       class="btn btn-xs btn-success">
                                         <i class="fa fa-pencil"></i> Edit
                                     </a>
-                                    
-                                    <button class="btn btn-xs btn-danger" onclick="doDelete('<?= sha1($row['id_buku']) ?>')" title="Hapus Data">
+                                    <button class="btn btn-xs btn-danger"
+                                            onclick="doDelete('<?= sha1($row['id_buku']) ?>')">
                                         <i class="fa fa-trash"></i> Hapus
                                     </button>
-                                    
                                     <?php if (!empty($row['e_book'])): ?>
-                                    <a href="<?= base_url('Assets/ebook/' . $row['e_book']) ?>" target="_blank" class="btn btn-xs btn-info" title="Lihat E-Book">
+                                    <!-- Pakai /Assets/... bukan base_url('Assets/...') -->
+                                    <a href="/Assets/uploads/ebook/<?= $row['e_book'] ?>"
+                                       target="_blank" class="btn btn-xs btn-info">
                                         <i class="fa fa-file-pdf-o"></i> E-Book
                                     </a>
                                     <?php endif; ?>
@@ -74,33 +88,27 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-// 1. Deteksi Flashdata Sukses dari Redirect Controller secara Otomatis
 <?php if (session()->getFlashdata('success')) : ?>
     Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: '<?= session()->getFlashdata('success'); ?>',
-        timer: 2000,
-        showConfirmButton: false
+        icon: 'success', title: 'Berhasil!',
+        text: '<?= session()->getFlashdata('success') ?>',
+        timer: 2000, showConfirmButton: false
     });
 <?php endif; ?>
 
-// 2. Handler Konfirmasi Penghapusan (Soft-Delete)
 function doDelete(id) {
     Swal.fire({
-        title: 'Hapus Data Buku?',
-        text: "Data buku yang dihapus akan dialihkan ke dalam sistem arsip data.",
+        title: 'Apakah Anda yakin?',
+        text: 'Data buku ini akan dihapus dari sistem aktif!',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#777',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
         confirmButtonText: 'Ya, Hapus!',
         cancelButtonText: 'Batal'
-    }).then((r) => {
-        if (r.isConfirmed) {
-            // Pembersihan penggabungan URL untuk mencegah tabrakan rute double slash
+    }).then((result) => {
+        if (result.isConfirmed) {
             window.location.href = '<?= base_url('admin/hapus-data-buku') ?>/' + id;
         }
     });
