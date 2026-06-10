@@ -11,7 +11,12 @@
 				<h1 class="page-header">Dashboard</h1>
 			</div>
 		</div><!--/.row-->
-		
+		<!-- DEBUG SEMENTARA — hapus setelah ketemu masalahnya -->
+<div class="alert alert-info">
+    ses_id: <?= session()->get('ses_id') ?> |
+    ses_level: "<?= session()->get('ses_level') ?>" |
+    ses_user: <?= session()->get('ses_user') ?>
+</div>
 		<div class="row">
 			<div class="col-xs-12 col-md-6 col-lg-3">
 				<div class="panel panel-blue panel-widget ">

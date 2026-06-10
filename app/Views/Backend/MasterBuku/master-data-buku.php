@@ -10,11 +10,13 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <h3>Data Buku
+                        <?php if (session()->get('ses_level') == '2'): ?>
                         <a href="<?= base_url('admin/input-data-buku') ?>">
                             <button class="btn btn-sm btn-primary pull-right">
                                 <i class="fa fa-plus"></i> Tambah Buku
                             </button>
                         </a>
+                        <?php endif; ?>
                     </h3>
                     <hr/>
                     <table class="table table-bordered table-striped table-hover"
@@ -22,12 +24,12 @@
                         <thead>
                             <tr>
                                 <th class="text-center" style="width:5%">No</th>
-                                <th class="text-center" style="width:8%">Cover</th>
+                                <th class="text-center" style="width:7%">Cover</th>
                                 <th class="text-center">Judul Buku</th>
                                 <th class="text-center">Pengarang</th>
                                 <th class="text-center" style="width:12%">Kategori</th>
                                 <th class="text-center" style="width:10%">Rak</th>
-                                <th class="text-center" style="width:6%">Stok</th>
+                                <th class="text-center" style="width:5%">Stok</th>
                                 <th class="text-center" style="width:20%">Opsi</th>
                             </tr>
                         </thead>
@@ -35,32 +37,55 @@
                         <?php $no = 1; foreach ($data_buku as $row): ?>
                             <tr>
                                 <td class="text-center"><?= $no++ ?></td>
+
+                                <!-- COVER -->
                                 <td class="text-center">
                                     <?php
-                                    // Gunakan /Assets/... bukan base_url('Assets/...')
-                                    $coverFile = FCPATH . 'Assets/uploads/cover/' . $row['cover_buku'];
-                                    $coverSrc  = (file_exists($coverFile) && $row['cover_buku'] != 'no-image.jpg' && $row['cover_buku'] != '')
-                                        ? '/Assets/uploads/cover/' . $row['cover_buku']
-                                        : '/Assets/img/no-image.jpg';
+                                    $namaCover   = trim($row['cover_buku'] ?? '');
+                                    $lokasiCover = FCPATH . 'Assets/uploads/cover/' . $namaCover;
+                                    if (!empty($namaCover) && $namaCover !== 'no-image.jpg' && is_file($lokasiCover)) {
+                                        $urlCover = base_url('Assets/uploads/cover/' . $namaCover);
+                                    } else {
+                                        $urlCover = base_url('Assets/img/no-image.jpg');
+                                    }
                                     ?>
-                                    <img src="<?= $coverSrc ?>"
+                                    <img src="<?= $urlCover ?>"
+                                         alt="Cover"
                                          width="45" height="60"
-                                         style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                                         style="object-fit:cover; border:1px solid #ddd; border-radius:4px;"
+                                         onerror="this.src='<?= base_url('Assets/img/no-image.jpg') ?>'">
                                 </td>
-                                <td><?= esc($row['judul_buku']) ?><br>
-                                    <small class="text-muted"><?= esc($row['penerbit']) ?> (<?= esc($row['tahun']) ?>)</small>
+
+                                <!-- JUDUL -->
+                                <td>
+                                    <strong><?= esc($row['judul_buku']) ?></strong><br>
+                                    <small class="text-muted">
+                                        <?= esc($row['penerbit']) ?> &bull; <?= esc($row['tahun']) ?>
+                                    </small>
                                 </td>
+
+                                <!-- PENGARANG -->
                                 <td><?= esc($row['pengarang']) ?></td>
+
+                                <!-- KATEGORI -->
                                 <td class="text-center">
                                     <span class="label label-info"><?= esc($row['nama_kategori']) ?></span>
                                 </td>
+
+                                <!-- RAK -->
                                 <td class="text-center">
                                     <span class="label label-default"><?= esc($row['nama_rak']) ?></span>
                                 </td>
+
+                                <!-- STOK -->
                                 <td class="text-center">
                                     <span class="badge"><?= $row['jumlah_eksemplar'] ?></span>
                                 </td>
+
+                                <!-- OPSI -->
                                 <td class="text-center">
+
+                                    <?php if (session()->get('ses_level') == '2'): ?>
                                     <a href="<?= base_url('admin/edit-data-buku/'.sha1($row['id_buku'])) ?>"
                                        class="btn btn-xs btn-success">
                                         <i class="fa fa-pencil"></i> Edit
@@ -69,13 +94,20 @@
                                             onclick="doDelete('<?= sha1($row['id_buku']) ?>')">
                                         <i class="fa fa-trash"></i> Hapus
                                     </button>
-                                    <?php if (!empty($row['e_book'])): ?>
-                                    <!-- Pakai /Assets/... bukan base_url('Assets/...') -->
-                                    <a href="/Assets/uploads/ebook/<?= $row['e_book'] ?>"
-                                       target="_blank" class="btn btn-xs btn-info">
+                                    <?php endif; ?>
+
+                                    <?php
+                                    $namaEbook   = trim($row['e_book'] ?? '');
+                                    $lokasiEbook = FCPATH . 'Assets/uploads/ebook/' . $namaEbook;
+                                    ?>
+                                    <?php if (!empty($namaEbook) && is_file($lokasiEbook)): ?>
+                                    <a href="<?= base_url('Assets/uploads/ebook/' . $namaEbook) ?>"
+                                       target="_blank"
+                                       class="btn btn-xs btn-info">
                                         <i class="fa fa-file-pdf-o"></i> E-Book
                                     </a>
                                     <?php endif; ?>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -90,17 +122,26 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 <?php if (session()->getFlashdata('success')) : ?>
-    Swal.fire({
-        icon: 'success', title: 'Berhasil!',
-        text: '<?= session()->getFlashdata('success') ?>',
-        timer: 2000, showConfirmButton: false
-    });
+Swal.fire({
+    icon: 'success',
+    title: 'Berhasil!',
+    text: '<?= session()->getFlashdata('success') ?>',
+    timer: 2000,
+    showConfirmButton: false
+});
+<?php endif; ?>
+<?php if (session()->getFlashdata('error')) : ?>
+Swal.fire({
+    icon: 'error',
+    title: 'Gagal!',
+    text: '<?= session()->getFlashdata('error') ?>'
+});
 <?php endif; ?>
 
 function doDelete(id) {
     Swal.fire({
         title: 'Apakah Anda yakin?',
-        text: 'Data buku ini akan dihapus dari sistem aktif!',
+        text: 'Data buku ini akan dihapus dari sistem!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
