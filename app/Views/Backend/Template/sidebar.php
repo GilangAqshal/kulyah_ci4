@@ -7,6 +7,8 @@
                 <span class="glyphicon glyphicon-list"></span> Master Data 
                 <!-- <span data-toggle="collapse" href="#sub-item-master" 
                       class="icon pull-right"> -->
+                <!-- <span data-toggle="collapse" href="#sub-item-master" 
+                      class="icon pull-right"> -->
                     <em class="glyphicon glyphicon-s glyphicon-plus"></em>
                 </span>
             </a>
