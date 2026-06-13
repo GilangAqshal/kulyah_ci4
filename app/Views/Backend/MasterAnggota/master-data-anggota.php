@@ -10,29 +10,37 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <h3>Data Anggota
+                        <?php if (session()->get('ses_level') == '2'): ?>
                         <a href="<?= base_url('admin/input-data-anggota') ?>">
                             <button class="btn btn-sm btn-primary pull-right">
                                 <i class="fa fa-user-plus"></i> Tambah Anggota
                             </button>
                         </a>
+                        <?php endif; ?>
                     </h3>
                     <hr/>
                     <table class="table table-bordered table-striped table-hover"
                            data-toggle="table" data-search="true" data-pagination="true">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width:7%">No</th>
+                                <th class="text-center" style="width:5%">No</th>
+                                <th class="text-center" style="width:10%">ID Anggota</th>
                                 <th class="text-center">Nama Anggota</th>
-                                <th class="text-center" style="width:15%">Jenis Kelamin</th>
-                                <th class="text-center" style="width:15%">No. Telp</th>
+                                <th class="text-center" style="width:13%">Jenis Kelamin</th>
+                                <th class="text-center" style="width:13%">No. Telp</th>
                                 <th class="text-center">Alamat</th>
-                                <th class="text-center" style="width:22%">Opsi</th>
+                                <?php if (session()->get('ses_level') == '2'): ?>
+                                <th class="text-center" style="width:18%">Opsi</th>
+                                <?php endif; ?>
                             </tr>
                         </thead>
                         <tbody>
                         <?php $no = 1; foreach ($data_anggota as $row): ?>
                             <tr>
                                 <td class="text-center"><?= $no++ ?></td>
+                                <td class="text-center">
+                                    <span class="label label-default"><?= esc($row['id_anggota']) ?></span>
+                                </td>
                                 <td><?= esc($row['nama_anggota']) ?></td>
                                 <td class="text-center">
                                     <?php if ($row['jenis_kelamin'] == 'L'): ?>
@@ -43,6 +51,7 @@
                                 </td>
                                 <td class="text-center"><?= esc($row['noTelp']) ?></td>
                                 <td><?= esc($row['alamat']) ?></td>
+                                <?php if (session()->get('ses_level') == '2'): ?>
                                 <td class="text-center">
                                     <a href="<?= base_url('admin/edit-data-anggota/'.sha1($row['id_anggota'])) ?>"
                                        class="btn btn-xs btn-success">
@@ -53,6 +62,7 @@
                                         <i class="fa fa-trash"></i> Hapus
                                     </button>
                                 </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -70,6 +80,12 @@
         icon: 'success', title: 'Berhasil!',
         text: '<?= session()->getFlashdata('success') ?>',
         timer: 2000, showConfirmButton: false
+    });
+<?php endif; ?>
+<?php if (session()->getFlashdata('error')) : ?>
+    Swal.fire({
+        icon: 'error', title: 'Gagal!',
+        text: '<?= session()->getFlashdata('error') ?>'
     });
 <?php endif; ?>
 
