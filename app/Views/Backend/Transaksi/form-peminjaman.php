@@ -7,7 +7,6 @@
         </ol>
     </div>
 
-    <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <style>
         .select2-container { width: 100% !important; }
@@ -16,18 +15,13 @@
             border: 1px solid #ccc !important;
             border-radius: 4px !important;
         }
-        .select2-selection__rendered { line-height: 34px !important; }
-        .select2-selection__arrow { height: 34px !important; }
-        .panel-step { border-left: 4px solid #337ab7; }
-        .empty-keranjang { text-align:center; color:#aaa; padding:30px 0; }
-        #tbody-keranjang tr { animation: fadeIn .25s ease; }
-        @keyframes fadeIn {
-            from { opacity:0; transform:translateY(-4px); }
-            to   { opacity:1; transform:translateY(0); }
-        }
+        .select2-selection__rendered { line-height: 34px !important; padding-left: 8px !important; }
+        .select2-selection__arrow   { height: 34px !important; }
+        .panel-step     { border-left: 4px solid #337ab7; }
+        .empty-keranjang{ text-align:center; color:#aaa; padding:30px 0; }
     </style>
 
-    <!-- STEP 1: PILIH ANGGOTA -->
+    <!-- STEP 1 -->
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default panel-step">
@@ -61,7 +55,7 @@
         </div>
     </div>
 
-    <!-- STEP 2: PILIH BUKU -->
+    <!-- STEP 2 -->
     <div class="row" id="section-buku" style="display:none;">
         <div class="col-md-12">
             <div class="panel panel-default panel-step">
@@ -69,8 +63,6 @@
                     <strong><i class="fa fa-book"></i> Step 2 — Tambah Buku ke Keranjang</strong>
                 </div>
                 <div class="panel-body">
-
-                    <!-- Form tambah buku -->
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
@@ -90,19 +82,20 @@
 
                     <hr>
 
-                    <!-- Tabel keranjang -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <h4 style="margin:0;">
                             <i class="fa fa-shopping-cart"></i> Keranjang
-                            <span id="badge-total" class="badge" style="background:#337ab7; font-size:13px;">0</span>
+                            <span id="badge-total" class="badge"
+                                  style="background:#337ab7; font-size:13px;">0</span>
                         </h4>
                     </div>
 
-                    <div id="loading-keranjang" style="display:none; text-align:center; padding:15px; color:#888;">
-                        <i class="fa fa-spinner fa-spin fa-lg"></i> Memuat keranjang...
+                    <div id="loading-keranjang"
+                         style="display:none; text-align:center; padding:15px; color:#888;">
+                        <i class="fa fa-spinner fa-spin fa-lg"></i> Memuat...
                     </div>
 
-                    <table class="table table-bordered table-striped table-hover" id="tabel-keranjang">
+                    <table class="table table-bordered table-striped table-hover">
                         <thead style="background:#f5f5f5;">
                             <tr>
                                 <th class="text-center" style="width:5%">No</th>
@@ -123,60 +116,97 @@
                         </tbody>
                     </table>
 
-                    <!-- Tombol simpan -->
                     <div id="section-simpan" style="display:none;">
                         <div class="alert alert-warning">
                             <i class="fa fa-exclamation-triangle"></i>
-                            Pastikan data sudah benar. Setelah disimpan, stok buku akan berkurang otomatis.
+                            Pastikan data sudah benar. Stok buku akan berkurang otomatis setelah disimpan.
                         </div>
                         <button id="btn-simpan" class="btn btn-primary btn-lg btn-block">
                             <i class="fa fa-save"></i> Simpan Transaksi Peminjaman
                         </button>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ============================================================
-     SCRIPT — letakkan di bawah setelah jQuery dari footer.php
-     sudah dimuat
-     ============================================================ -->
+<!-- Load Select2 SETELAH jQuery (jQuery sudah ada di footer.php) -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function () {
 
-    const BASE = '<?= base_url() ?>';
-    let idAnggota   = '';
-    let namaAnggota = '';
-    let idBuku      = '';
+    // ── Ambil CSRF token dari meta tag (CI4) ─────────────────
+    // CI4 menyimpan CSRF di cookie, kita kirim via header
+    const BASE       = '<?= base_url() ?>';
+    const CSRF_NAME  = '<?= csrf_token() ?>';
+    const CSRF_HASH  = '<?= csrf_hash() ?>';
 
-    // ── SELECT2 ANGGOTA ──────────────────────────────────────
+    let idAnggota    = '';
+    let namaAnggota  = '';
+    let idBuku       = '';
+    let csrfHash     = CSRF_HASH; // akan diupdate setiap response
+
+    // ── Setup AJAX global: kirim CSRF di setiap POST ─────────
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (settings.type === 'POST') {
+                // Tambahkan CSRF ke data
+                if (typeof settings.data === 'string') {
+                    settings.data += '&' + CSRF_NAME + '=' + csrfHash;
+                } else if (typeof settings.data === 'object') {
+                    settings.data[CSRF_NAME] = csrfHash;
+                }
+            }
+        }
+    });
+
+    // Update csrfHash dari setiap response AJAX
+    $(document).ajaxComplete(function (event, xhr) {
+        const newToken = xhr.getResponseHeader('X-CSRF-TOKEN');
+        if (newToken) csrfHash = newToken;
+    });
+
+    // ── SELECT2: ANGGOTA ──────────────────────────────────────
     $('#select-anggota').select2({
         placeholder        : '-- Ketik ID atau Nama Anggota --',
         allowClear         : true,
         minimumInputLength : 1,
-        language           : { inputTooShort: () => 'Ketik minimal 1 karakter...' },
+        language: {
+            inputTooShort    : () => 'Ketik minimal 1 karakter...',
+            searching        : () => 'Mencari...',
+            noResults        : () => 'Anggota tidak ditemukan'
+        },
         ajax: {
-            url      : BASE + '/admin/ajax-cari-anggota',
+            url      : BASE + 'admin/ajax-cari-anggota',
             type     : 'POST',
             dataType : 'json',
-            delay    : 300,
-            data     : params => ({ q: params.term }),
-            processResults: data => ({ results: data.results }),
-            cache    : false
+            delay    : 400,
+            headers  : { 'X-Requested-With': 'XMLHttpRequest' },
+            data: function (params) {
+                let payload = { q: params.term || '' };
+                payload[CSRF_NAME] = csrfHash;
+                return payload;
+            },
+            processResults: function (data) {
+                // Update CSRF jika ada di response
+                if (data.csrf_hash) csrfHash = data.csrf_hash;
+                return { results: data.results || [] };
+            },
+            error: function (xhr) {
+                console.error('AJAX error anggota:', xhr.status, xhr.responseText);
+            },
+            cache: false
         }
     });
 
     $('#select-anggota').on('select2:select', function (e) {
-        const d   = e.params.data;
-        const bag = d.text.split(' - ');
+        const d    = e.params.data;
+        const bag  = d.text.split(' - ');
         idAnggota   = d.id;
-        namaAnggota = bag[1] ?? d.text;
+        namaAnggota = bag.length > 1 ? bag[1] : d.text;
 
         $('#tampil-id-anggota').text(idAnggota);
         $('#tampil-nama-anggota').text(namaAnggota);
@@ -193,20 +223,35 @@ $(document).ready(function () {
         renderKeranjang([]);
     });
 
-    // ── SELECT2 BUKU ─────────────────────────────────────────
+    // ── SELECT2: BUKU ─────────────────────────────────────────
     $('#select-buku').select2({
         placeholder        : '-- Ketik Judul atau Pengarang --',
         allowClear         : true,
         minimumInputLength : 1,
-        language           : { inputTooShort: () => 'Ketik minimal 1 karakter...' },
+        language: {
+            inputTooShort : () => 'Ketik minimal 1 karakter...',
+            searching     : () => 'Mencari...',
+            noResults     : () => 'Buku tidak ditemukan atau stok habis'
+        },
         ajax: {
-            url      : BASE + '/admin/ajax-cari-buku',
+            url      : BASE + 'admin/ajax-cari-buku',
             type     : 'POST',
             dataType : 'json',
-            delay    : 300,
-            data     : params => ({ q: params.term }),
-            processResults: data => ({ results: data.results }),
-            cache    : false
+            delay    : 400,
+            headers  : { 'X-Requested-With': 'XMLHttpRequest' },
+            data: function (params) {
+                let payload = { q: params.term || '' };
+                payload[CSRF_NAME] = csrfHash;
+                return payload;
+            },
+            processResults: function (data) {
+                if (data.csrf_hash) csrfHash = data.csrf_hash;
+                return { results: data.results || [] };
+            },
+            error: function (xhr) {
+                console.error('AJAX error buku:', xhr.status, xhr.responseText);
+            },
+            cache: false
         }
     });
 
@@ -228,14 +273,20 @@ $(document).ready(function () {
         }
 
         const btn = $(this);
-        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menambahkan...');
+        btn.prop('disabled', true)
+           .html('<i class="fa fa-spinner fa-spin"></i> Menambahkan...');
+
+        let payload = { id_anggota: idAnggota, id_buku: idBuku };
+        payload[CSRF_NAME] = csrfHash;
 
         $.ajax({
-            url      : BASE + '/admin/ajax-tambah-keranjang',
+            url      : BASE + 'admin/ajax-tambah-keranjang',
             type     : 'POST',
-            data     : { id_anggota: idAnggota, id_buku: idBuku },
+            data     : payload,
             dataType : 'json',
+            headers  : { 'X-Requested-With': 'XMLHttpRequest' },
             success  : function (res) {
+                if (res.csrf_hash) csrfHash = res.csrf_hash;
                 if (res.status === 'success') {
                     renderKeranjang(res.keranjang);
                     $('#select-buku').val(null).trigger('change');
@@ -248,15 +299,21 @@ $(document).ready(function () {
                     Swal.fire('Gagal!', res.message, 'error');
                 }
             },
-            error    : () => Swal.fire('Error', 'Terjadi kesalahan server!', 'error'),
-            complete : () => btn.prop('disabled', false)
-                               .html('<i class="fa fa-plus"></i> Tambah ke Keranjang')
+            error: function (xhr) {
+                console.error('Error tambah:', xhr.responseText);
+                Swal.fire('Error', 'Terjadi kesalahan: ' + xhr.status, 'error');
+            },
+            complete: function () {
+                btn.prop('disabled', false)
+                   .html('<i class="fa fa-plus"></i> Tambah ke Keranjang');
+            }
         });
     });
 
     // ── HAPUS DARI KERANJANG ──────────────────────────────────
     $(document).on('click', '.btn-hapus', function () {
         const idB = $(this).data('buku');
+
         Swal.fire({
             title: 'Hapus dari keranjang?',
             icon : 'warning',
@@ -264,18 +321,26 @@ $(document).ready(function () {
             confirmButtonColor: '#d33',
             confirmButtonText : 'Ya, Hapus!',
             cancelButtonText  : 'Batal'
-        }).then(r => {
+        }).then(function (r) {
             if (!r.isConfirmed) return;
+
+            let payload = { id_anggota: idAnggota, id_buku: idB };
+            payload[CSRF_NAME] = csrfHash;
+
             $.ajax({
-                url      : BASE + '/admin/ajax-hapus-keranjang',
+                url      : BASE + 'admin/ajax-hapus-keranjang',
                 type     : 'POST',
-                data     : { id_anggota: idAnggota, id_buku: idB },
+                data     : payload,
                 dataType : 'json',
+                headers  : { 'X-Requested-With': 'XMLHttpRequest' },
                 success  : function (res) {
+                    if (res.csrf_hash) csrfHash = res.csrf_hash;
                     if (res.status === 'success') {
                         renderKeranjang(res.keranjang);
-                        Swal.fire({ icon:'success', title:'Dihapus!',
-                            text: res.message, timer:1200, showConfirmButton:false });
+                        Swal.fire({
+                            icon: 'success', title: 'Dihapus!',
+                            text: res.message, timer: 1200, showConfirmButton: false
+                        });
                     } else {
                         Swal.fire('Gagal!', res.message, 'error');
                     }
@@ -299,19 +364,24 @@ $(document).ready(function () {
             confirmButtonColor: '#337ab7',
             confirmButtonText : '<i class="fa fa-save"></i> Ya, Simpan!',
             cancelButtonText  : 'Batal'
-        }).then(r => {
+        }).then(function (r) {
             if (!r.isConfirmed) return;
 
             const btn = $('#btn-simpan');
             btn.prop('disabled', true)
                .html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
+            let payload = { id_anggota: idAnggota };
+            payload[CSRF_NAME] = csrfHash;
+
             $.ajax({
-                url      : BASE + '/admin/ajax-simpan-transaksi',
+                url      : BASE + 'admin/ajax-simpan-transaksi',
                 type     : 'POST',
-                data     : { id_anggota: idAnggota },
+                data     : payload,
                 dataType : 'json',
+                headers  : { 'X-Requested-With': 'XMLHttpRequest' },
                 success  : function (res) {
+                    if (res.csrf_hash) csrfHash = res.csrf_hash;
                     if (res.status === 'success') {
                         Swal.fire({
                             icon : 'success',
@@ -319,8 +389,8 @@ $(document).ready(function () {
                             html : 'No. Peminjaman: <strong>' + res.no_peminjaman + '</strong><br>'
                                  + 'Tgl Kembali: <strong>' + getTglKembali() + '</strong>',
                             confirmButtonText: 'Lihat Data Transaksi'
-                        }).then(() => {
-                            window.location.href = BASE + '/admin/data-transaksi-peminjaman';
+                        }).then(function () {
+                            window.location.href = BASE + 'admin/data-transaksi-peminjaman';
                         });
                     } else {
                         Swal.fire('Gagal!', res.message, 'error');
@@ -328,7 +398,8 @@ $(document).ready(function () {
                            .html('<i class="fa fa-save"></i> Simpan Transaksi Peminjaman');
                     }
                 },
-                error: function () {
+                error: function (xhr) {
+                    console.error('Error simpan:', xhr.responseText);
                     Swal.fire('Error', 'Terjadi kesalahan server!', 'error');
                     btn.prop('disabled', false)
                        .html('<i class="fa fa-save"></i> Simpan Transaksi Peminjaman');
@@ -337,11 +408,11 @@ $(document).ready(function () {
         });
     });
 
-    // ── HELPER: RENDER TABEL KERANJANG ────────────────────────
+    // ── RENDER KERANJANG ──────────────────────────────────────
     function renderKeranjang(data) {
         const tbody = $('#tbody-keranjang');
         tbody.empty();
-        $('#badge-total').text(data.length);
+        $('#badge-total').text(data ? data.length : 0);
 
         if (!data || data.length === 0) {
             tbody.append(`
@@ -361,15 +432,18 @@ $(document).ready(function () {
                     <td class="text-center">${i + 1}</td>
                     <td>
                         <strong>${item.judul_buku}</strong><br>
-                        <small class="text-muted">${item.penerbit ?? '-'}</small>
+                        <small class="text-muted">${item.penerbit || '-'}</small>
                     </td>
                     <td class="text-center">${item.pengarang}</td>
                     <td class="text-center">${item.tahun}</td>
                     <td class="text-center">
-                        <span class="badge" style="background:#5cb85c;">${item.jumlah_eksemplar}</span>
+                        <span class="badge" style="background:#5cb85c;">
+                            ${item.jumlah_eksemplar}
+                        </span>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-xs btn-danger btn-hapus" data-buku="${item.id_buku}">
+                        <button class="btn btn-xs btn-danger btn-hapus"
+                                data-buku="${item.id_buku}">
                             <i class="fa fa-trash"></i> Hapus
                         </button>
                     </td>
@@ -379,20 +453,22 @@ $(document).ready(function () {
         $('#section-simpan').fadeIn(200);
     }
 
-    // ── HELPER: LOAD KERANJANG ────────────────────────────────
+    // ── LOAD KERANJANG ────────────────────────────────────────
     function loadKeranjang() {
+        if (!idAnggota) return;
         $('#loading-keranjang').show();
         $.ajax({
-            url      : BASE + '/admin/ajax-get-keranjang',
+            url      : BASE + 'admin/ajax-get-keranjang',
             type     : 'GET',
             data     : { id_anggota: idAnggota },
             dataType : 'json',
-            success  : res => renderKeranjang(res.keranjang),
-            complete : () => $('#loading-keranjang').hide()
+            success  : function (res) { renderKeranjang(res.keranjang); },
+            error    : function (xhr) { console.error('Error load keranjang:', xhr.responseText); },
+            complete : function () { $('#loading-keranjang').hide(); }
         });
     }
 
-    // ── HELPER: TANGGAL +7 ────────────────────────────────────
+    // ── TANGGAL +7 ────────────────────────────────────────────
     function getTglKembali() {
         const d = new Date();
         d.setDate(d.getDate() + 7);

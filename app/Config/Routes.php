@@ -109,17 +109,12 @@ $routes->get('/admin/edit-data-buku/(:alphanum)', 'Buku::edit_data_buku/$1');
 $routes->post('/admin/update-buku', 'Buku::update_data_buku');
 $routes->get('/admin/hapus-data-buku/(:alphanum)', 'Buku::hapus_data_buku/$1');
 
-// === TRANSAKSI PEMINJAMAN ===
-$routes->get('/admin/transaksi-peminjaman',          'Peminjaman::index');
-$routes->get('/admin/data-transaksi-peminjaman',     'Peminjaman::data_transaksi');
-
-// AJAX endpoints
-$routes->post('/admin/ajax-cari-anggota',            'Peminjaman::ajax_cari_anggota');
-$routes->post('/admin/ajax-cari-buku',               'Peminjaman::ajax_cari_buku');
-$routes->post('/admin/ajax-tambah-keranjang',        'Peminjaman::ajax_tambah_keranjang');
-$routes->post('/admin/ajax-hapus-keranjang',         'Peminjaman::ajax_hapus_keranjang');
-$routes->get('/admin/ajax-get-keranjang',            'Peminjaman::ajax_get_keranjang');
-$routes->post('/admin/ajax-simpan-transaksi',        'Peminjaman::ajax_simpan_transaksi');
-
-// Detail peminjaman
-$routes->get('/admin/detail-peminjaman/(:alphanum)', 'Peminjaman::detail_peminjaman/$1');
+// === TRANSAKSI PEMINJAMAN (sesuai PDF) ===
+$routes->get('/admin/data-transaksi-peminjaman',        'Admin::data_transaksi_peminjaman');
+$routes->get('/admin/peminjaman-step-1',                'Admin::peminjaman_step1');
+$routes->get('/admin/peminjaman-step-2',                'Admin::peminjaman_step2');
+$routes->post('/admin/peminjaman-step-2',               'Admin::peminjaman_step2');
+$routes->get('/admin/simpan-temp-pinjam/(:alphanum)',   'Admin::simpan_temp_pinjam/$1');
+$routes->get('/admin/hapus-temp/(:alphanum)',           'Admin::hapus_peminjaman/$1');
+$routes->get('/admin/simpan-transaksi-peminjaman',      'Admin::simpan_transaksi_peminjaman');
+$routes->get('/admin/detail-peminjaman/(:any)',         'Admin::detail_peminjaman/$1');

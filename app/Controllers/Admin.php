@@ -4,9 +4,278 @@ namespace App\Controllers;
 
 // load models
 use App\Models\M_Admin;
+use App\Models\M_Anggota;
+use App\Models\M_Buku;
+use App\Models\M_Peminjaman;
 
 class Admin extends BaseController
 {
+    // ── DATA TRANSAKSI PEMINJAMAN ─────────────────────────────
+public function data_transaksi_peminjaman()
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $modelPeminjaman = new M_Peminjaman();
+    $data['data_peminjaman'] = $modelPeminjaman->getDataPeminjamanJoin()->getResultArray();
+
+    $uri           = service('uri');
+    $data['page']  = $uri->getSegment(2);
+    $data['title'] = 'Data Transaksi Peminjaman';
+
+    echo view('Backend/Template/header', $data);
+    echo view('Backend/Template/sidebar', $data);
+    echo view('Backend/Transaksi/data-transaksi-peminjaman', $data);
+    echo view('Backend/Template/footer', $data);
+}
+
+// ── STEP 1: INPUT ID ANGGOTA ──────────────────────────────
+public function peminjaman_step1()
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $uri           = service('uri');
+    $data['page']  = $uri->getSegment(2);
+    $data['title'] = 'Transaksi Peminjaman';
+
+    echo view('Backend/Template/header', $data);
+    echo view('Backend/Template/sidebar', $data);
+    echo view('Backend/Transaksi/peminjaman-step-1', $data);
+    echo view('Backend/Template/footer', $data);
+}
+
+// ── STEP 2: PILIH BUKU ────────────────────────────────────
+public function peminjaman_step2()
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $modelAnggota    = new M_Anggota();
+    $modelBuku       = new M_Buku();
+    $modelPeminjaman = new M_Peminjaman();
+
+    $uri   = service('uri');
+    $page  = $uri->getSegment(2);
+
+    // Ambil id_anggota dari POST (step 1) atau dari session
+    if ($this->request->getPost('id_anggota')) {
+        $idAnggota = $this->request->getPost('id_anggota');
+        session()->set(['idAgt' => $idAnggota]);
+    } else {
+        $idAnggota = session()->get('idAgt');
+    }
+
+    // Cek apakah anggota masih punya peminjaman berjalan
+    $cekPeminjaman = $modelPeminjaman->getDataPeminjaman([
+        'id_anggota'       => $idAnggota,
+        'status_transaksi' => 'Berjalan'
+    ])->getNumRows();
+
+    if ($cekPeminjaman > 0) {
+        session()->setFlashdata('error', 'Transaksi Tidak Dapat Dilakukan, Masih Ada Transaksi Peminjaman yang Belum Diselesaikan!!');
+        ?>
+        <script>history.go(-1);</script>
+        <?php
+        return;
+    } else {
+        $dataAnggota = $modelAnggota->getDataAnggota(['id_anggota' => $idAnggota])->getRowArray();
+        $dataBuku    = $modelBuku->getDataBuku(['b.is_delete_buku' => '0'])->getResultArray();
+
+        $jumlahTemp  = $modelPeminjaman->getDataTemp(['id_anggota' => $idAnggota])->getNumRows();
+        $dataTemp    = $modelPeminjaman->getDataTempJoin(['tbl_temp_peminjaman.id_anggota' => $idAnggota])->getResultArray();
+
+        $data['page']         = $page;
+        $data['title']        = 'Transaksi Peminjaman';
+        $data['dataAnggota']  = $dataAnggota;
+        $data['dataBuku']     = $dataBuku;
+        $data['jumlahTemp']   = $jumlahTemp;
+        $data['dataTemp']     = $dataTemp;
+
+        echo view('Backend/Template/header', $data);
+        echo view('Backend/Template/sidebar', $data);
+        echo view('Backend/Transaksi/peminjaman-step-2', $data);
+        echo view('Backend/Template/footer', $data);
+    }
+}
+
+// ── SIMPAN KE TABEL TEMP ──────────────────────────────────
+public function simpan_temp_pinjam($idBuku = null)
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $modelPeminjaman = new M_Peminjaman();
+    $modelBuku       = new M_Buku();
+
+    $uri    = service('uri');
+    $idBuku = $uri->getSegment(3);
+
+    // Ambil data buku berdasarkan sha1
+    $dataBuku = $modelBuku->getDataBuku(['sha1(b.id_buku)' => $idBuku])->getRowArray();
+
+    // Cek apakah buku sudah ada di keranjang anggota ini
+    $adaTemp = $modelPeminjaman->getDataTemp([
+        'sha1(id_buku)'  => $idBuku,
+        'id_anggota'     => session()->get('idAgt')
+    ])->getNumRows();
+
+    // Cek apakah anggota masih punya peminjaman berjalan
+    $adaBerjalan = $modelPeminjaman->getDataPeminjaman([
+        'id_anggota'       => session()->get('idAgt'),
+        'status_transaksi' => 'Berjalan'
+    ])->getNumRows();
+
+    if ($adaTemp) {
+        session()->setFlashdata('error', 'Satu Anggota Hanya Bisa Meminjam 1 Buku dengan Judul yang Sama!');
+        ?>
+        <script>history.go(-1);</script>
+        <?php
+    } elseif ($adaBerjalan) {
+        session()->setFlashdata('error', 'Masih ada transaksi peminjaman yang belum diselesaikan, silakan selesaikan peminjaman sebelumnya terlebih dahulu!');
+        ?>
+        <script>history.go(-1);</script>
+        <?php
+    } else {
+        // Simpan ke tabel temp
+        $dataSimpanTemp = [
+            'id_anggota'  => session()->get('idAgt'),
+            'id_buku'     => $dataBuku['id_buku'],
+            'jumlah_temp' => '1'
+        ];
+        $modelPeminjaman->saveDataTemp($dataSimpanTemp);
+
+        // Kurangi stok buku
+        $stok       = $dataBuku['jumlah_eksemplar'] - 1;
+        $dataUpdate = ['jumlah_eksemplar' => $stok];
+        $modelBuku->updateDataBuku($dataUpdate, ['sha1(id_buku)' => $idBuku]);
+        ?>
+        <script>
+            document.location = "<?= base_url('admin/peminjaman-step-2'); ?>";
+        </script>
+        <?php
+    }
+}
+
+// ── HAPUS DARI TABEL TEMP ─────────────────────────────────
+public function hapus_peminjaman($idBuku = null)
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $modelPeminjaman = new M_Peminjaman();
+    $modelBuku       = new M_Buku();
+
+    $uri    = service('uri');
+    $idBuku = $uri->getSegment(3);
+
+    $dataBuku = $modelBuku->getDataBuku(['sha1(b.id_buku)' => $idBuku])->getRowArray();
+
+    // Hapus dari temp
+    $modelPeminjaman->hapusDataTemp([
+        'sha1(id_buku)' => $idBuku,
+        'id_anggota'    => session()->get('idAgt')
+    ]);
+
+    // Kembalikan stok buku
+    $stok       = $dataBuku['jumlah_eksemplar'] + 1;
+    $dataUpdate = ['jumlah_eksemplar' => $stok];
+    $modelBuku->updateDataBuku($dataUpdate, ['sha1(id_buku)' => $idBuku]);
+    ?>
+    <script>
+        document.location = "<?= base_url('admin/peminjaman-step-2'); ?>";
+    </script>
+    <?php
+}
+
+// ── SIMPAN TRANSAKSI PEMINJAMAN ───────────────────────────
+public function simpan_transaksi_peminjaman()
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $modelPeminjaman = new M_Peminjaman();
+
+    // Generate no_peminjaman: format ymdHis
+    $idPeminjaman  = date('ymdHis');
+    $timeSekarang  = time();
+    $kembali       = date('Y-m-d', strtotime('+7 days', $timeSekarang));
+    $jumlahPinjam  = $modelPeminjaman->getDataTemp(['id_anggota' => session()->get('idAgt')])->getNumRows();
+
+    // Simpan header peminjaman
+    $dataSimpan = [
+        'no_peminjaman'     => $idPeminjaman,
+        'id_anggota'        => session()->get('idAgt'),
+        'tgl_pinjam'        => date('Y-m-d'),
+        'total_pinjam'      => $jumlahPinjam,
+        'id_admin'          => session()->get('ses_id'),
+        'status_transaksi'  => 'Berjalan',
+        'status_ambil_buku' => 'Belum Diambil',
+        'qr_code'           => '',
+    ];
+    $modelPeminjaman->saveDataPeminjaman($dataSimpan);
+
+    // Simpan detail dari tabel temp
+    $dataTemp = $modelPeminjaman->getDataTemp(['id_anggota' => session()->get('idAgt')])->getResultArray();
+    foreach ($dataTemp as $sementara) {
+        $simpanDetail = [
+            'no_peminjaman' => $idPeminjaman,
+            'id_buku'       => $sementara['id_buku'],
+            'status_pinjam' => 'Sedang Dipinjam',
+            'perpanjangan'  => '2',
+            'tgl_kembali'   => $kembali,
+        ];
+        $modelPeminjaman->saveDataDetail($simpanDetail);
+    }
+
+    // Kosongkan tabel temp & hapus session anggota
+    $modelPeminjaman->hapusDataTemp(['id_anggota' => session()->get('idAgt')]);
+    session()->remove('idAgt');
+    session()->setFlashdata('success', 'Data Peminjaman Buku Berhasil Disimpan!');
+    ?>
+    <script>
+        document.location = "<?= base_url('admin/data-transaksi-peminjaman'); ?>";
+    </script>
+    <?php
+}
+
+// ── DETAIL PEMINJAMAN ─────────────────────────────────────
+public function detail_peminjaman($noPeminjaman = null)
+{
+    if (!session()->get('ses_id')) {
+        session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+        return redirect()->to(base_url('admin/login-admin'));
+    }
+
+    $modelPeminjaman = new M_Peminjaman();
+
+    $data['header'] = $modelPeminjaman->getDataPeminjamanJoin([
+        'tbl_peminjaman.no_peminjaman' => $noPeminjaman
+    ])->getRowArray();
+
+    $data['detail'] = $modelPeminjaman->getDataDetailJoin([
+        'tbl_detail_peminjaman.no_peminjaman' => $noPeminjaman
+    ])->getResultArray();
+
+    $data['title'] = 'Detail Peminjaman';
+
+    echo view('Backend/Template/header', $data);
+    echo view('Backend/Template/sidebar', $data);
+    echo view('Backend/Transaksi/detail-peminjaman', $data);
+    echo view('Backend/Template/footer', $data);
+}
     public function login()
     {
         return view('Backend/Login/login');

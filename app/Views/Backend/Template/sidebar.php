@@ -44,24 +44,24 @@
         </li>
 
         <!-- TRANSAKSI -->
-        <li class="parent">
-            <a href="#sub-item-transaksi" data-toggle="collapse" aria-expanded="false">
-                <span class="fa fa-exchange"></span> Transaksi
-                <em class="glyphicon glyphicon-plus pull-right" style="margin-top:3px;"></em>
+<li class="parent">
+    <a href="#sub-item-transaksi" data-toggle="collapse" aria-expanded="false">
+        <span class="fa fa-exchange"></span> Transaksi
+        <em class="glyphicon glyphicon-plus pull-right" style="margin-top:3px;"></em>
+    </a>
+    <ul class="children collapse" id="sub-item-transaksi">
+        <li>
+            <a href="<?= base_url('admin/peminjaman-step-1') ?>">
+                <span class="fa fa-plus-circle"></span> Input Peminjaman
             </a>
-            <ul class="children collapse" id="sub-item-transaksi">
-                <li>
-                    <a href="<?= base_url('admin/transaksi-peminjaman') ?>">
-                        <span class="fa fa-plus-circle"></span> Input Peminjaman
-                    </a>
-                </li>
-                <li>
-                    <a href="<?= base_url('admin/data-transaksi-peminjaman') ?>">
-                        <span class="fa fa-list-alt"></span> Data Peminjaman
-                    </a>
-                </li>
-            </ul>
         </li>
+        <li>
+            <a href="<?= base_url('admin/data-transaksi-peminjaman') ?>">
+                <span class="fa fa-list-alt"></span> Data Peminjaman
+            </a>
+        </li>
+    </ul>
+</li>
 
         <li role="presentation" class="divider"></li>
 

@@ -7,20 +7,22 @@
         </ol>
     </div>
 
-    <!-- HEADER PEMINJAMAN -->
+    <!-- INFO HEADER -->
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading"><strong><i class="fa fa-info-circle"></i> Info Peminjaman</strong></div>
+                <div class="panel-heading">
+                    <strong><i class="fa fa-info-circle"></i> Info Peminjaman</strong>
+                </div>
                 <div class="panel-body">
                     <table class="table table-condensed" style="margin:0;">
                         <tr>
-                            <td style="width:40%"><strong>No. Peminjaman</strong></td>
+                            <td style="width:45%"><strong>No. Peminjaman</strong></td>
                             <td><?= esc($header['no_peminjaman']) ?></td>
                         </tr>
                         <tr>
-                            <td><strong>Anggota</strong></td>
-                            <td><?= esc($header['nama_anggota']) ?></td>
+                            <td><strong>Nama Anggota</strong></td>
+                            <td><?= esc($header['nama_anggota'] ?? '-') ?></td>
                         </tr>
                         <tr>
                             <td><strong>Tgl Pinjam</strong></td>
@@ -29,6 +31,10 @@
                         <tr>
                             <td><strong>Total Buku</strong></td>
                             <td><span class="badge"><?= $header['total_pinjam'] ?></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nama Admin</strong></td>
+                            <td><?= esc($header['nama_admin'] ?? '-') ?></td>
                         </tr>
                         <tr>
                             <td><strong>Status Transaksi</strong></td>
@@ -41,7 +47,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><strong>Status Ambil</strong></td>
+                            <td><strong>Status Ambil Buku</strong></td>
                             <td>
                                 <?php if ($header['status_ambil_buku'] == 'Belum Diambil'): ?>
                                     <span class="label label-danger">Belum Diambil</span>
@@ -60,7 +66,9 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading"><strong><i class="fa fa-book"></i> Daftar Buku Dipinjam</strong></div>
+                <div class="panel-heading">
+                    <strong><i class="fa fa-book"></i> Daftar Buku Dipinjam</strong>
+                </div>
                 <div class="panel-body">
                     <table class="table table-bordered table-striped">
                         <thead>
@@ -68,9 +76,10 @@
                                 <th class="text-center" style="width:5%">No</th>
                                 <th>Judul Buku</th>
                                 <th class="text-center">Pengarang</th>
-                                <th class="text-center">Tgl Kembali</th>
-                                <th class="text-center">Status Pinjam</th>
-                                <th class="text-center">Perpanjangan</th>
+                                <th class="text-center">Penerbit</th>
+                                <th class="text-center" style="width:12%">Tgl Kembali</th>
+                                <th class="text-center" style="width:15%">Status Pinjam</th>
+                                <th class="text-center" style="width:8%">Perpanjangan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,6 +88,7 @@
                                 <td class="text-center"><?= $no++ ?></td>
                                 <td><strong><?= esc($row['judul_buku']) ?></strong></td>
                                 <td class="text-center"><?= esc($row['pengarang']) ?></td>
+                                <td class="text-center"><?= esc($row['penerbit']) ?></td>
                                 <td class="text-center"><?= $row['tgl_kembali'] ?></td>
                                 <td class="text-center">
                                     <?php if ($row['status_pinjam'] == 'Sedang Dipinjam'): ?>
