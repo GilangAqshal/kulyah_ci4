@@ -3,7 +3,7 @@
 
         <!-- DASHBOARD -->
         <li>
-            <a href="<?= base_url('admin/dashboardAdmin') ?>">
+            <a href="<?= base_url('admin/dashboard') ?>">
                 <span class="fa fa-tachometer"></span> Dashboard
             </a>
         </li>
