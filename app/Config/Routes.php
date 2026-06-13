@@ -118,3 +118,4 @@ $routes->get('/admin/simpan-temp-pinjam/(:alphanum)',   'Admin::simpan_temp_pinj
 $routes->get('/admin/hapus-temp/(:alphanum)',           'Admin::hapus_peminjaman/$1');
 $routes->get('/admin/simpan-transaksi-peminjaman',      'Admin::simpan_transaksi_peminjaman');
 $routes->get('/admin/detail-peminjaman/(:any)',         'Admin::detail_peminjaman/$1');
+$routes->get('/admin/update-status-ambil/(:any)', 'Admin::update_status_ambil/$1');

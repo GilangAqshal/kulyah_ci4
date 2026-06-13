@@ -51,6 +51,13 @@
                             <td>
                                 <?php if ($header['status_ambil_buku'] == 'Belum Diambil'): ?>
                                     <span class="label label-danger">Belum Diambil</span>
+                                    &nbsp;
+                                    <?php if (session()->get('ses_level') == '2'): ?>
+                                    <button class="btn btn-xs btn-success"
+                                            onclick="konfirmasiAmbil('<?= $header['no_peminjaman'] ?>')">
+                                        <i class="fa fa-check"></i> Tandai Sudah Diambil
+                                    </button>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <span class="label label-success">Sudah Diambil</span>
                                 <?php endif; ?>
@@ -113,3 +120,31 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+<?php if (session()->getFlashdata('success')): ?>
+Swal.fire({
+    icon: 'success', title: 'Berhasil!',
+    text: '<?= session()->getFlashdata('success') ?>',
+    timer: 2000, showConfirmButton: false
+});
+<?php endif; ?>
+
+function konfirmasiAmbil(noPeminjaman) {
+    Swal.fire({
+        title: 'Konfirmasi Pengambilan Buku',
+        html: 'Tandai bahwa buku dengan No. Peminjaman<br><strong>' + noPeminjaman + '</strong><br>sudah diambil oleh anggota?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#5cb85c',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '<i class="fa fa-check"></i> Ya, Sudah Diambil!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '<?= base_url('admin/update-status-ambil') ?>/' + noPeminjaman;
+        }
+    });
+}
+</script>

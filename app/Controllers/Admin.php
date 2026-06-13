@@ -557,4 +557,21 @@ class Admin extends BaseController
             echo view('Backend/Template/footer', $data);
         }
     }
+
+        public function update_status_ambil($noPeminjaman = null)
+    {
+        if (!session()->get('ses_id')) {
+            session()->setFlashdata('error', 'Silakan login terlebih dahulu!');
+            return redirect()->to(base_url('admin/login-admin'));
+        }
+
+        $modelPeminjaman = new M_Peminjaman();
+        $modelPeminjaman->updateDataPeminjaman(
+            ['status_ambil_buku' => 'Sudah Diambil'],
+            ['no_peminjaman'     => $noPeminjaman]
+        );
+
+        session()->setFlashdata('success', 'Status Ambil Buku Berhasil Diperbarui!');
+        return redirect()->to(base_url('admin/detail-peminjaman/' . $noPeminjaman));
+    }
 }
