@@ -55,7 +55,7 @@
                                     <?php if (session()->get('ses_level') == '2'): ?>
                                     <button class="btn btn-xs btn-success"
                                             onclick="konfirmasiAmbil('<?= $header['no_peminjaman'] ?>')">
-                                        <i class="fa fa-check"></i> Tandai Sudah Diambil
+                                        <i class="fa fa-check"></i> Tandai Sudah Diambill
                                     </button>
                                     <?php endif; ?>
                                 <?php else: ?>
