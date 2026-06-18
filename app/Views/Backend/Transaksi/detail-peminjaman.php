@@ -59,7 +59,7 @@
                                     </button>
                                     <?php endif; ?>
                                 <?php else: ?>
-                                    <span class="label label-success">Sudah Diambil</span>
+                                    <span class="label label-success">Sudah Diambill</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
